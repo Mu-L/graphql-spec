@@ -429,19 +429,19 @@ SameResponseShape(fieldA, fieldB):
 
   * Let {typeA} be the return type of {fieldA}.
   * Let {typeB} be the return type of {fieldB}.
-  * If {typeA} or {typeB} is Non-Null.
-    * If {typeA} or {typeB} is nullable, return false.
-    * Let {typeA} be the nullable type of {typeA}
-    * Let {typeB} be the nullable type of {typeB}
-  * If {typeA} or {typeB} is List.
-    * If {typeA} or {typeB} is not List, return false.
-    * Let {typeA} be the item type of {typeA}
-    * Let {typeB} be the item type of {typeB}
+  * If {typeA} or {typeB} is a *Non-Null type*.
+    * If {typeA} or {typeB} is not a *Non-Null type*, return false.
+    * Let {typeA} be the *nullable type* of {typeA}
+    * Let {typeB} be the *nullable type* of {typeB}
+  * If {typeA} or {typeB} is a *List type*.
+    * If {typeA} or {typeB} is not a *List type*, return false.
+    * Let {typeA} be the *item type* of {typeA}
+    * Let {typeB} be the *item type* of {typeB}
     * Repeat from step 3.
-  * If {typeA} or {typeB} is Scalar or Enum.
+  * If {typeA} or {typeB} is *Scalar type* or *Enum type*.
     * If {typeA} and {typeB} are the same type return true, otherwise return
       false.
-  * Assert: {typeA} and {typeB} are both composite types.
+  * Assert: {typeA} and {typeB} are both a *composite type*.
   * Let {mergedSet} be the result of adding the selection set of {fieldA} and
     the selection set of {fieldB}.
   * Let {fieldsForName} be the set of selections with a given response name in
@@ -1579,8 +1579,8 @@ fragment HouseTrainedFragment on Query {
 
 **Explanatory Text**
 
-Variables can only be input types. Objects, unions, and interfaces cannot be
-used as inputs.
+Variables can only be an *input type*. Objects, unions, interfaces and other
+*output types* cannot be used as the type of a variable.
 
 For these examples, consider the following type system additions:
 
@@ -1882,33 +1882,33 @@ IsVariableUsageAllowed(variableDefinition, variableUsage):
   * Let {variableType} be the expected type of {variableDefinition}.
   * Let {locationType} be the expected type of the {Argument}, {ObjectField},
     or {ListValue} entry where {variableUsage} is located.
-  * If {locationType} is a non-null type AND {variableType} is NOT a non-null type:
+  * If {locationType} is a *Non-Null type* AND {variableType} is NOT a *Non-Null type*:
     * Let {hasNonNullVariableDefaultValue} be {true} if a default value exists
       for {variableDefinition} and is not the value {null}.
     * Let {hasLocationDefaultValue} be {true} if a default value exists for
       the {Argument} or {ObjectField} where {variableUsage} is located.
     * If {hasNonNullVariableDefaultValue} is NOT {true} AND
       {hasLocationDefaultValue} is NOT {true}, return {false}.
-    * Let {nullableLocationType} be the unwrapped nullable type of {locationType}.
+    * Let {nullableLocationType} be the inner *nullable type* of {locationType}.
     * Return {AreTypesCompatible(variableType, nullableLocationType)}.
   * Return {AreTypesCompatible(variableType, locationType)}.
 
 AreTypesCompatible(variableType, locationType):
 
-  * If {locationType} is a non-null type:
-    * If {variableType} is NOT a non-null type, return {false}.
-    * Let {nullableLocationType} be the unwrapped nullable type of {locationType}.
-    * Let {nullableVariableType} be the unwrapped nullable type of {variableType}.
+  * If {locationType} is a *non-null type*:
+    * If {variableType} is NOT a *non-null type*, return {false}.
+    * Let {nullableLocationType} be the inner *nullable type* of {locationType}.
+    * Let {nullableVariableType} be the inner *nullable type* of {variableType}.
     * Return {AreTypesCompatible(nullableVariableType, nullableLocationType)}.
-  * Otherwise, if {variableType} is a non-null type:
+  * Otherwise, if {variableType} is a *non-null type*:
     * Let {nullableVariableType} be the nullable type of {variableType}.
     * Return {AreTypesCompatible(nullableVariableType, locationType)}.
-  * Otherwise, if {locationType} is a list type:
-    * If {variableType} is NOT a list type, return {false}.
-    * Let {itemLocationType} be the unwrapped item type of {locationType}.
-    * Let {itemVariableType} be the unwrapped item type of {variableType}.
+  * Otherwise, if {locationType} is a *list type*:
+    * If {variableType} is NOT a *list type*, return {false}.
+    * Let {itemLocationType} be the inner *item type* of {locationType}.
+    * Let {itemVariableType} be the inner *item type* of {variableType}.
     * Return {AreTypesCompatible(itemVariableType, itemLocationType)}.
-  * Otherwise, if {variableType} is a list type, return {false}.
+  * Otherwise, if {variableType} is a *list type*, return {false}.
   * Return {true} if {variableType} and {locationType} are identical, otherwise {false}.
 
 **Explanatory Text**
@@ -1917,7 +1917,7 @@ Variable usages must be compatible with the arguments they are passed to.
 
 Validation failures occur when variables are used in the context of types
 that are complete mismatches, or if a nullable type in a variable is passed to
-a non-null argument type.
+an argument with a *Non-Null type*.
 
 Types must match:
 
